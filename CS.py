@@ -2,32 +2,50 @@ import socket as s
 import glob
 from itertools import islice
 import sys
+import time
 
 def Find():
-    Pattern = 'C:/**/*.txt'
-    return list(islice(glob.iglob(Pattern, recursive=True), 2))
+    #Pattern = 'C:/**/*.txt'
+    Pattern = '*.jpg'
+    return list(islice(glob.iglob(Pattern, recursive=True), 4))
 
 def SendFile(sock, filepath):
     f = open(filepath, 'rb')
-    datas = f.read(1024)
-
+    datas = 1
     while datas:
-        sock.send(datas)
         datas = f.read(1024)
+        sock.send(datas)
 
 def GetFilename(Msg):
     new = Msg.split('/')
     return new[-1]
 
-def CreateDown(Socket, Filename):
-    print("file--- " + Filename)
-    f = open(Filename, 'wb+')
+def TryToDecode(msg):
+    try:
+        out = msg.decode()
+        return out
+    except:
+        return -1
 
+def CreateDownl(Socket, Filename):
+    print("file--- " + Filename)
+    print('aa')
+    f = open(Filename, 'wb+')
     while True:
-        datas = Socket.recv(1024)
+        datas = 1
         while datas:
+            print('w for recv')
+            datas = Socket.recv(2048)
+            eof = "---EOF---EOF---FCSFLAG---"
+            out = TryToDecode(datas)
+            if out != -1:
+                print(datas)
+                if eof in TryToDecode(datas):
+                    print("rasdadsfdsfsdgjsdfk;gj\n\n")
+                    break
+
             f.write(datas)
-            datas = Socket.recv(1024)
+            print("sec while recv got")
         f.close()
         break
     print("Downloaded...")
@@ -45,25 +63,34 @@ def Receiver():
     print(Info)
 
     msg = ""
-    while msg != "EOF":
+    while True:
         msg = ClientSocket.recv(256).decode() # filename
-        CreateDown(ClientSocket, msg)
+        if msg == '':
+            break
+        CreateDownl(ClientSocket, msg)
+        print("before 1")
         ClientSocket.send('1'.encode())
-
 
 
 def Sender():
     Socket = s.socket(s.AF_INET, s.SOCK_STREAM)
     Socket.connect(("127.0.0.1", 9050))
     list = Find()
-    ll = len(list)
-    for i in range(0, ll):
-        name = GetFilename(list[i])
+    ll = len(list)-1
+    print(ll)
+    while ll != -1:
+        print(list)
+        name = GetFilename(list[ll])
         Socket.send(name.encode())
-        SendFile(Socket, list[i])
-        Socket.send("EOF".encode())
-        print("done")
+        SendFile(Socket, list[ll])
+        time.sleep(2)
+        Socket.send("---EOF---EOF---FCSFLAG---".encode())
+        list.remove(name)
+        print(list)
+        print("file done")
         Socket.recv(16)
+        print("\n\n"+str(ll))
+        ll-=1
 
     
     
