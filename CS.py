@@ -74,7 +74,12 @@ def Receiver():
 
 def Sender():
     Socket = s.socket(s.AF_INET, s.SOCK_STREAM)
-    Socket.connect(("127.0.0.1", 9050))
+    while True:
+        try:
+            Socket.connect(("127.0.0.1", 9050))
+        except:
+            continue
+        break
     list = Find()
     ll = len(list)-1
     print(ll)
