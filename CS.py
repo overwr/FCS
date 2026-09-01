@@ -34,18 +34,15 @@ def CreateDownl(Socket, Filename):
     while True:
         datas = 1
         while datas:
-            print('w for recv')
             datas = Socket.recv(2048)
             eof = "---EOF---EOF---FCSFLAG---"
             out = TryToDecode(datas)
             if out != -1:
                 print(datas)
                 if eof in TryToDecode(datas):
-                    print("rasdadsfdsfsdgjsdfk;gj\n\n")
                     break
 
             f.write(datas)
-            print("sec while recv got")
         f.close()
         break
     print("Downloaded...")
